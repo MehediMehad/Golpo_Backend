@@ -4,8 +4,8 @@ import { UsersServices } from './users.service';
 import catchAsync from '../../helpers/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 
-const createOrGetUser = catchAsync(async (req, res) => {
-  const result = await UsersServices.createOrGetUser(req.body);
+const registerOrLoginUser = catchAsync(async (req, res) => {
+  const result = await UsersServices.registerOrLoginUser(req.body);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -15,4 +15,4 @@ const createOrGetUser = catchAsync(async (req, res) => {
   });
 });
 
-export const UsersControllers = { createOrGetUser };
+export const UsersControllers = { registerOrLoginUser };

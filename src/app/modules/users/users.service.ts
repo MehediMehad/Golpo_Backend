@@ -1,18 +1,9 @@
-import type { JoinedProviderEnum } from '@prisma/client';
-
 import type { TAuthPayload } from '../../helpers/jwtHelpers';
 import { jwtHelpers } from '../../helpers/jwtHelpers';
 import prisma from '../../libs/prisma';
+import { TRegisterOrLoginUserPayload } from './user.interface';
 
-type TPayload = {
-  email: string;
-  name: string;
-  image: string;
-  provider: JoinedProviderEnum;
-  providerId: string;
-};
-
-const createOrGetUser = async (payload: TPayload) => {
+const registerOrLoginUser = async (payload: TRegisterOrLoginUserPayload) => {
   const { email, name, image, provider, providerId } = payload;
 
   const user = await prisma.user.findUnique({
@@ -59,13 +50,11 @@ const createOrGetUser = async (payload: TPayload) => {
   };
 
   // Generate an access token
-  const accessToken = jwtHelpers.generateAuthTokens(data).accessToken;
-  const refreshToken = jwtHelpers.generateAuthTokens(data).refreshToken;
+  const { accessToken, refreshToken } = jwtHelpers.generateAuthTokens(data);
 
-  console.log({ accessToken, refreshToken });
   return { ...updatedUser, accessToken, refreshToken };
 };
 
 export const UsersServices = {
-  createOrGetUser,
+  registerOrLoginUser,
 };
