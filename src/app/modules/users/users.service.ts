@@ -19,6 +19,15 @@ const registerOrLoginUser = async (payload: TRegisterOrLoginUserPayload) => {
         provider,
         providerId,
       },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        image: true,
+        provider: true,
+        providerId: true,
+        role: true,
+      },
     });
 
     const data: TAuthPayload = {
@@ -40,6 +49,15 @@ const registerOrLoginUser = async (payload: TRegisterOrLoginUserPayload) => {
       image,
       provider,
       providerId,
+    },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      image: true,
+      provider: true,
+      providerId: true,
+      role: true,
     },
   });
 
