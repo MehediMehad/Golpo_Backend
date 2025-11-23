@@ -23,7 +23,222 @@ model User {
   joinedAt  DateTime @default(now())
   loginAt   DateTime @updatedAt
 
+  memberships    ChatRoomMember[]
+  messagesSent   Message[]        @relation("sender")
+  callLogs       CallLog[]        @relation("caller")
+  adminOfRooms   ChatRoom[]       @relation("admin")
+  reactions      Reaction[]
+  pinnedMessages PinnedMessage[]
+  savedMessages  SavedMessage[]
+
   @@map("users")
+}
+
+model ChatRoom {
+  id        String       @id @default(auto()) @map("_id") @db.ObjectId
+  type      ChatRoomType @default(PRIVATE)
+  name      String? // for group chats
+  image     String? // for group chats
+  adminId   String?      @db.ObjectId // for group chats
+  admin     User?        @relation("admin", fields: [adminId], references: [id])
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  members        ChatRoomMember[]
+  messages       Message[]
+  calls          CallLog[]
+  pinnedMessages PinnedMessage[]
+  savedMessages  SavedMessage[]
+
+  @@index([type], map: "idx_chatroom_type")
+  @@map("chat_rooms")
+}
+
+model ChatRoomMember {
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  chatRoomId  String     @db.ObjectId
+  chatRoom    ChatRoom   @relation(fields: [chatRoomId], references: [id])
+  userId      String     @db.ObjectId
+  user        User       @relation(fields: [userId], references: [id])
+  role        MemberRole @default(MEMBER)
+  isMuted     Boolean    @default(false)
+  lastSeen    DateTime?
+  unreadCount Int        @default(0)
+  joinedAt    DateTime   @default(now())
+
+  @@unique([chatRoomId, userId], map: "uq_room_user")
+  @@index([userId], map: "idx_member_userId")
+  @@index([chatRoomId], map: "idx_member_chatRoomId")
+  @@map("chat_room_members")
+}
+
+model Message {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  chatRoomId String   @db.ObjectId
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
+
+  senderId String @db.ObjectId
+  sender   User   @relation("sender", fields: [senderId], references: [id])
+
+  type        MessageType         @default(TEXT)
+  content     String?
+  attachments MessageAttachment[]
+
+  // Reply message 
+  replyToId String?   @db.ObjectId
+  replyTo   Message?  @relation("replyMessage", fields: [replyToId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  replies   Message[] @relation("replyMessage")
+
+  readBy ReadByEntry[]
+
+  reactionsCount Int        @default(0)
+  reactions      Reaction[]
+  isDeleted      Boolean    @default(false)
+
+  editedAt       DateTime?
+  createdAt      DateTime        @default(now())
+  pinnedMessages PinnedMessage[]
+  savedMessages  SavedMessage[]
+
+  @@index([chatRoomId, createdAt], map: "idx_msg_chatroom_createdAt")
+  @@map("messages")
+}
+
+type ReadByEntry {
+  id     String   @db.ObjectId
+  name   String
+  image  String?
+  readAt DateTime
+}
+
+model MessageAttachment {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  messageId String  @db.ObjectId
+  message   Message @relation(fields: [messageId], references: [id])
+
+  url      String
+  filename String?
+  mimeType String?
+  size     Int?
+  duration Int?
+  width    Int?
+  height   Int?
+
+  createdAt DateTime @default(now())
+
+  @@index([messageId], map: "idx_attachment_messageId")
+  @@map("message_attachments")
+}
+
+model Reaction {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  messageId String  @db.ObjectId
+  message   Message @relation(fields: [messageId], references: [id])
+
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+
+  type      String // e.g., "like", "love", "laugh", etc.
+  createdAt DateTime @default(now())
+
+  @@unique([messageId, userId, type], map: "uq_reaction_msg_user_type")
+  @@index([messageId], map: "idx_reaction_messageId")
+  @@map("reactions")
+}
+
+model CallLog {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  chatRoomId String   @db.ObjectId
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
+
+  callerId String @db.ObjectId
+  caller   User   @relation("caller", fields: [callerId], references: [id])
+
+  calleeIds String[] @db.ObjectId // group call support
+
+  type      CallType
+  status    CallStatus
+  startedAt DateTime?
+  endedAt   DateTime?
+  duration  Int? // seconds
+
+  createdAt DateTime @default(now())
+
+  @@index([chatRoomId], map: "idx_call_chatRoomId")
+  @@map("call_logs")
+}
+
+model PinnedMessage {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  chatRoomId String   @db.ObjectId
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
+
+  messageId String  @db.ObjectId
+  message   Message @relation(fields: [messageId], references: [id])
+
+  pinnedById String @db.ObjectId
+  pinnedBy   User   @relation(fields: [pinnedById], references: [id])
+
+  pinnedAt DateTime @default(now())
+
+  @@unique([chatRoomId, messageId], map: "uq_pinned_chatroom_message")
+  @@index([chatRoomId], map: "idx_pinned_chatroomId")
+  @@map("pinned_messages")
+}
+
+model SavedMessage {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  chatRoomId String   @db.ObjectId
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
+  messageId  String   @db.ObjectId
+  message    Message  @relation(fields: [messageId], references: [id])
+
+  savedById String @db.ObjectId
+  savedBy   User   @relation(fields: [savedById], references: [id])
+
+  savedAt DateTime @default(now())
+
+  @@unique([chatRoomId, messageId, savedById], map: "uq_saved_chatroom_message_user")
+  @@index([chatRoomId], map: "idx_saved_chatroomId")
+  @@map("saved_messages")
+}
+
+// Enums
+
+// Chats 
+enum ChatRoomType {
+  PRIVATE
+  GROUP
+}
+
+enum MemberRole {
+  MEMBER
+  ADMIN
+}
+
+enum MessageType {
+  TEXT
+  LINK
+  IMAGE
+  VIDEO
+  AUDIO
+  FILE
+  SYSTEM
+  REACTION
+  REPLY
+  CALL
+}
+
+enum CallType {
+  AUDIO
+  VIDEO
+}
+
+enum CallStatus {
+  CANCELLED
+  MISSED
+  ENDED
 }
 
 enum JoinedProviderEnum {
@@ -32,6 +247,7 @@ enum JoinedProviderEnum {
   facebook
 }
 
+// User roles and status
 enum RoleEnum {
   USER
   ADMIN
