@@ -10,10 +10,10 @@ const router = express.Router();
 
 
 router.post(
-    '/create-private-room',
+    '/join-private-room',
     // auth("USER"),
     validateRequest(ChatsValidations.createPrivateChatRoomSchema),
-    ChatsControllers.createPrivateChatRoom,
+    ChatsControllers.joinPrivateChatRoom,
 );
 
 export const ChatsRoutes = router;

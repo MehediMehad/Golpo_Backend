@@ -3,7 +3,7 @@ import httpStatus from 'http-status';
 import ApiError from '../../errors/ApiError';
 import prisma from '../../libs/prisma';
 
-const createPrivateChatRoom = async (userId: string, recipientId: string) => {
+const joinPrivateChatRoom = async (userId: string, recipientId: string) => {
     const user = await prisma.user.findUnique({
         where: { id: userId, status: 'ACTIVE' },
     });
@@ -56,4 +56,4 @@ const createPrivateChatRoom = async (userId: string, recipientId: string) => {
     return newRoom;
 };
 
-export const ChatsServices = { createPrivateChatRoom };
+export const ChatsServices = { joinPrivateChatRoom };
