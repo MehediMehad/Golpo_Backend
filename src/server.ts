@@ -1,10 +1,13 @@
 import type { Server as HttpServer } from 'http';
+import { Server as SocketIOServer } from 'socket.io';
 
 import app from './app';
 import { getLocalIP } from './app/helpers/devHelpers';
 import config from './app/configs';
+import { initializeSocket } from './app/modules/chats/chat.socket';
 
 let server: HttpServer;
+let io: SocketIOServer;
 
 async function main() {
   try {
@@ -13,6 +16,19 @@ async function main() {
     server = app.listen(port, async () => {
       console.log(`🚀 Server is running on port ${port}`);
       getLocalIP(); // 🖥️ Your PC's local IPv4 address(es)
+
+      // Initialize Socket.IO
+      io = new SocketIOServer(server, {
+        cors: {
+          origin: '*', // Adjust based on your frontend URL
+          methods: ['GET', 'POST'],
+        },
+      });
+
+      // Pass io to socket handler
+      initializeSocket(io);
+
+
     });
 
     // 🔐 Handle Uncaught Exceptions
