@@ -10,7 +10,7 @@ import { getEnvVar } from '../utils/getEnvVar';
 
 const config = {
   app: {
-    env: getEnvVar('NODE_ENV'),
+    node_env: getEnvVar('NODE_ENV'),
     port: getEnvVar('PORT'),
   },
   auth: authConfig,
@@ -32,6 +32,11 @@ const config = {
     account_id: getEnvVar('ZOOM_ACCOUNT_ID'),
     client_id: getEnvVar('ZOOM_CLIENT_ID'),
     client_secret: getEnvVar('ZOOM_CLIENT_SECRET'),
+  },
+  REDIS: {
+    host: getEnvVar('REDIS_HOST', '127.0.0.1'),
+    port: Number(getEnvVar('REDIS_PORT', '6379')),
+    password: getEnvVar('REDIS_PASSWORD'),
   },
 };
 
