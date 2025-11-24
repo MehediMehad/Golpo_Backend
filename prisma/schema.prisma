@@ -62,6 +62,9 @@ model ChatRoomMember {
   user        User       @relation(fields: [userId], references: [id])
   role        MemberRole @default(MEMBER)
   isMuted     Boolean    @default(false)
+  isLeft      Boolean    @default(false) // indicates if the user has left the group
+  isBlocked   Boolean    @default(false) // indicates if the user is blocked in the group
+  isArchived  Boolean    @default(false) // indicates if the user has archived the chat
   lastSeen    DateTime?
   unreadCount Int        @default(0)
   joinedAt    DateTime   @default(now())

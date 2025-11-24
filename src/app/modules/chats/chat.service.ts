@@ -52,5 +52,16 @@ const joinPrivateChatRoom = async (userId: string, recipientId: string) => {
 
   return newRoom;
 };
+const getUserRoomIds = async (userId: string) => {
+  const rooms = await prisma.chatRoomMember.findMany({
+    where: { userId },
+    select: { chatRoomId: true },
+  });
 
-export const ChatsServices = { joinPrivateChatRoom };
+  return rooms.map((r) => r.chatRoomId);
+};
+
+export const ChatsServices = {
+  joinPrivateChatRoom,
+  getUserRoomIds,
+};
