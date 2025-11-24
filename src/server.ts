@@ -14,6 +14,7 @@ async function main() {
     await redis.ping();
     // 🟢 Start the server
     const port = config.app.port;
+
     server = app.listen(port, async () => {
       console.log(`🟢 Server is running on port ${port}`);
       getLocalIP(); // 🖥️ Your PC's local IPv4 address(es)
@@ -58,11 +59,25 @@ async function shutdown() {
   try {
     console.log('⏳ Shutting down...');
 
+    // Close HTTP server
     if (server) {
-      await new Promise((resolve) => server.close(resolve));
-      console.info('🔒 HTTP server closed.');
+      try {
+        await new Promise<void>((resolve, reject) => {
+          server.close((err) => (err ? reject(err) : resolve()));
+        });
+        console.info('🔒 HTTP server closed.');
+      } catch (err) {
+        console.error('❌ Error closing HTTP server:', err);
+      }
     }
 
+    // Close Socket.IO
+    if (io) {
+      io.close();
+      console.info('🔒 Socket.IO server closed.');
+    }
+
+    // Close Redis
     await redis.quit();
     console.info('🗄️ Redis connection closed.');
 
