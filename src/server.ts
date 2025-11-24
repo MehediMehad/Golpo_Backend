@@ -1,9 +1,10 @@
 import type { Server as HttpServer } from 'http';
+
 import { Server as SocketIOServer } from 'socket.io';
 
 import app from './app';
-import { getLocalIP } from './app/helpers/devHelpers';
 import config from './app/configs';
+import { getLocalIP } from './app/helpers/devHelpers';
 import { initializeSocket } from './app/modules/chats/chat.socket';
 
 let server: HttpServer;
@@ -27,8 +28,6 @@ async function main() {
 
       // Pass io to socket handler
       initializeSocket(io);
-
-
     });
 
     // 🔐 Handle Uncaught Exceptions

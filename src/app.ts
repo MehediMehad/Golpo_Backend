@@ -45,10 +45,10 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-// 📡 API Health Check Search Browser ex: http://10.0.10.62:7090/
+// 📡 API Health Check Search Browser ex: http://10.0.10.62:3001
 app.get('/', (_req: Request, res: Response) => {
   res.status(httpStatus.OK).send(`
-  <h1 style="color: green">Aayaam Service is running</h1>
+  <h1 style="color: green">GolpoBeat Service is running</h1>
   `);
 });
 
@@ -60,22 +60,7 @@ app.get('/force-error', () => {
   throw new Error('Force Error');
 });
 
-// Get Data from Database with authentication
-// app.get(
-//   "/user",
-//   auth(UserRoleEnum.SUPERADMIN),
-//   async (_req: Request, res: Response) => {
-//     const result = await prisma.user.findMany({ select: { name: true } });
-//     res.send({
-//       success: true,
-//       data: result,
-//       message: "Only ADMIN can access this data",
-//     });
-//   }
-// );
-
-// 🧯 Global Error Handler
-
+// Global Error Handler
 app.use(globalErrorHandler);
 
 // 🚫 404 Not Found Handler

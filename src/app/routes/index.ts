@@ -1,7 +1,7 @@
 import express from 'express';
 
-import { UsersRoutes } from '../modules/users/users.route';
 import { ChatsRoutes } from '../modules/chats/chat.routes';
+import { UsersRoutes } from '../modules/users/users.route';
 
 const router = express.Router();
 

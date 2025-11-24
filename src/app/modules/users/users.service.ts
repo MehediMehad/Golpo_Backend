@@ -1,7 +1,7 @@
+import type { TRegisterOrLoginUserPayload } from './user.interface';
 import type { TAuthPayload } from '../../helpers/jwtHelpers';
 import { jwtHelpers } from '../../helpers/jwtHelpers';
 import prisma from '../../libs/prisma';
-import { TRegisterOrLoginUserPayload } from './user.interface';
 
 const registerOrLoginUser = async (payload: TRegisterOrLoginUserPayload) => {
   const { email, name, image, provider, providerId } = payload;
