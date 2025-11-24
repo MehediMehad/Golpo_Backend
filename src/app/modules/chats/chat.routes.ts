@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.post(
     '/join-private-room',
-    // auth("USER"),
+    auth("USER"),
     validateRequest(ChatsValidations.createPrivateChatRoomSchema),
     ChatsControllers.joinPrivateChatRoom,
 );
