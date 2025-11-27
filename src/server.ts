@@ -3,7 +3,7 @@ import { Server as SocketIOServer } from 'socket.io';
 import app from './app';
 import config from './app/configs';
 import { getLocalIP } from './app/helpers/devHelpers';
-import redis from './app/libs/redis';
+// import redis from './app/libs/redis';
 import { initializeSocket } from './app/modules/chats/chat.socket';
 
 let server: HttpServer;
@@ -11,7 +11,7 @@ let io: SocketIOServer;
 
 async function main() {
   try {
-    await redis.ping();
+    // await redis.ping();
     // 🟢 Start the server
     const port = config.app.port;
 
@@ -78,7 +78,7 @@ async function shutdown() {
     }
 
     // Close Redis
-    await redis.quit();
+    // await redis.quit();
     console.info('🗄️ Redis connection closed.');
 
     process.exit(0);

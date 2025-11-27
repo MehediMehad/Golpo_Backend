@@ -1,10 +1,17 @@
-import type { TRegisterOrLoginUserPayload } from './user.interface';
+import type { TRegisterOrLoginUserPayload } from './auth.interface';
 import type { TAuthPayload } from '../../helpers/jwtHelpers';
 import { jwtHelpers } from '../../helpers/jwtHelpers';
 import prisma from '../../libs/prisma';
+import bcrypt from 'bcrypt';
+import config from '../../configs';
 
 const registerOrLoginUser = async (payload: TRegisterOrLoginUserPayload) => {
-  const { email, name, image, provider, providerId } = payload;
+  const { email, name, image, provider, providerId, password } = payload;
+
+  if (password) {
+    const hashedPassword = await bcrypt.hash(password, config.auth.bcrypt_salt_rounds);
+    payload.password = hashedPassword;
+  }
 
   const user = await prisma.user.findUnique({
     where: { email },
@@ -18,6 +25,7 @@ const registerOrLoginUser = async (payload: TRegisterOrLoginUserPayload) => {
         image,
         provider,
         providerId,
+        password: payload.password || undefined,
       },
       select: {
         id: true,
@@ -49,6 +57,7 @@ const registerOrLoginUser = async (payload: TRegisterOrLoginUserPayload) => {
       image,
       provider,
       providerId,
+      password: payload.password || user.password || undefined,
     },
     select: {
       id: true,
@@ -73,6 +82,11 @@ const registerOrLoginUser = async (payload: TRegisterOrLoginUserPayload) => {
   return { ...updatedUser, accessToken, refreshToken };
 };
 
-export const UsersServices = {
+const loginUser = async (payload: TRegisterOrLoginUserPayload) => {
+
+};
+
+export const AuthsServices = {
   registerOrLoginUser,
+  loginUser,
 };
