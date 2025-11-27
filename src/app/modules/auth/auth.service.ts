@@ -1,9 +1,11 @@
-import type { TRegisterOrLoginUserPayload } from './auth.interface';
+import type { TLoginUserPayload, TRegisterOrLoginUserPayload } from './auth.interface';
 import type { TAuthPayload } from '../../helpers/jwtHelpers';
 import { jwtHelpers } from '../../helpers/jwtHelpers';
 import prisma from '../../libs/prisma';
 import bcrypt from 'bcrypt';
 import config from '../../configs';
+import ApiError from '../../errors/ApiError';
+import httpStatus from 'http-status';
 
 const registerOrLoginUser = async (payload: TRegisterOrLoginUserPayload) => {
   const { email, name, image, provider, providerId, password } = payload;
@@ -82,7 +84,43 @@ const registerOrLoginUser = async (payload: TRegisterOrLoginUserPayload) => {
   return { ...updatedUser, accessToken, refreshToken };
 };
 
-const loginUser = async (payload: TRegisterOrLoginUserPayload) => {
+const loginUser = async (payload: TLoginUserPayload) => {
+  const { email, password } = payload;
+
+  const user = await prisma.user.findUnique({
+    where: { email },
+    select: { id: true, email: true, name: true, image: true, role: true, password: true, status: true }
+  });
+
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found!');
+  }
+
+  if (user.status === 'BLOCKED') {
+    throw new ApiError(httpStatus.FORBIDDEN, 'Your account is blocked!');
+  }
+
+  if (!user.password) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'You have not set a password yet! try social login!');
+  }
+
+  const isPasswordMatched = await bcrypt.compare(password, user.password);
+
+  if (!isPasswordMatched) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect password!');
+  }
+
+  const data: TAuthPayload = {
+    userId: user.id,
+    email: user.email,
+    role: user.role,
+  };
+
+  // Generate an access token
+  const { accessToken, refreshToken } = jwtHelpers.generateAuthTokens(data);
+
+  const { password: _, ...rest } = user
+  return { ...rest, accessToken, refreshToken };
 
 };
 
