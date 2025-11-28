@@ -12,7 +12,7 @@ router.post(
   AuthsControllers.loginUser,
 );
 router.post(
-  '/join',
+  '/signup',
   validateRequest(AuthsValidations.registerOrLoginUserSchema),
   AuthsControllers.registerOrLoginUser,
 );

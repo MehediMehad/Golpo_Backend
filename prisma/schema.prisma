@@ -14,8 +14,8 @@ model User {
   email    String  @unique
   password String?
 
-  provider   JoinedProviderEnum
-  providerId String
+  provider   JoinedProviderEnum @default(email)
+  providerId String             @default("")
   role       RoleEnum           @default(USER)
   status     UserStatusEnum     @default(ACTIVE)
 
@@ -248,6 +248,7 @@ enum JoinedProviderEnum {
   google
   github
   facebook
+  email
 }
 
 // User roles and status

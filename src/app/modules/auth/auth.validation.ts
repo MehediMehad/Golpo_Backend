@@ -10,10 +10,19 @@ export const loginSchema = z.object({
 export const registerOrLoginUserSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters').optional(),
   image: z.string().url('Invalid image URL').optional(),
-  provider: z.enum(JoinedProviderEnum),
-  providerId: z.string(),
+  password: z.string().min(6, 'Password must be at least 6 characters').optional(),
+  provider: z.enum(JoinedProviderEnum).optional(),
+  providerId: z.string().optional(),
+}).superRefine((data, ctx) => {
+  // If no provider is present, the password field MUST have a value
+  if (!data.provider && !data.password) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Password is required when no provider is specified',
+      path: ['password'], // Associates the error with the password field
+    });
+  }
 });
 
 
