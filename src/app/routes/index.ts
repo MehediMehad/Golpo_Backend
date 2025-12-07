@@ -1,17 +1,17 @@
-import express from 'express';
+import express from "express";
 
-import { ChatsRoutes } from '../modules/chats/chat.routes';
-import { AuthsRoutes } from '../modules/auth/auth.route';
+import { AuthsRoutes } from "../modules/auth/auth.route";
+import { ChatsRoutes } from "../modules/chats/chat.routes";
 
 const router = express.Router();
 
 const moduleRoutes = [
   {
-    path: '/auth',
+    path: "/auth",
     route: AuthsRoutes,
   },
   {
-    path: '/chats',
+    path: "/chats",
     route: ChatsRoutes,
   },
 ];
@@ -19,3 +19,4 @@ const moduleRoutes = [
 moduleRoutes.forEach((route) => router.use(route.path, route.route));
 
 export default router;
+
