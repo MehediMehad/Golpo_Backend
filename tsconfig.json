@@ -4,8 +4,10 @@
     "target": "ES2018",
 
     /* Modules */
-    "module": "commonjs",
+    "module": "ESNext",
     "rootDir": "./src",
+
+    "moduleResolution": "node",
 
     /* Emit */
     "outDir": "./dist",
