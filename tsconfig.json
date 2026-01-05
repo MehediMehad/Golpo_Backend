@@ -1,13 +1,37 @@
+// {
+//   "compilerOptions": {
+//     /* Language and Environment */
+//     "target": "ES2018",
+
+//     /* Modules */
+//     "module": "ESNext",
+//     "moduleResolution": "node",
+//     "rootDir": "./src",
+
+//     /* Emit */
+//     "outDir": "./dist",
+
+//     /* Interop Constraints */
+//     "esModuleInterop": true,
+//     "forceConsistentCasingInFileNames": true,
+
+//     /* Type Checking */
+//     "strict": true,
+
+//     /* Completeness */
+//     "skipLibCheck": true
+//   }
+// }
+
 {
   "compilerOptions": {
     /* Language and Environment */
     "target": "ES2018",
 
     /* Modules */
-    "module": "ESNext",
-    "rootDir": "./src",
-
+    "module": "CommonJS",
     "moduleResolution": "node",
+    "rootDir": "./src",
 
     /* Emit */
     "outDir": "./dist",
