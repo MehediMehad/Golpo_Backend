@@ -1,3 +1,4 @@
+import type { ChatRoomType } from '@prisma/client';
 import httpStatus from 'http-status';
 
 import ApiError from '../../errors/ApiError';
@@ -61,7 +62,109 @@ const getUserRoomIds = async (userId: string) => {
   return rooms.map((r) => r.chatRoomId);
 };
 
+const getChatRoomsByUserId = async (userId: string, type?: ChatRoomType) => {
+  const rooms = await prisma.chatRoomMember.findMany({
+    where: {
+      userId,
+      isLeft: false,
+      isArchived: false,
+      chatRoom: {
+        type,
+      },
+    },
+    select: {
+      unreadCount: true,
+      isMuted: true,
+      chatRoom: {
+        select: {
+          id: true,
+          type: true,
+          name: true,
+          image: true,
+          lastMessage: true,
+          lastMessageAt: true,
+          updatedAt: true,
+
+          members: {
+            where: {
+              userId: { not: userId },
+            },
+            select: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  image: true,
+                },
+              },
+            },
+          },
+          messages: {
+            orderBy: { createdAt: 'desc' },
+            take: 1,
+            select: {
+              id: true,
+              content: true,
+              type: true,
+              createdAt: true,
+              sender: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+              readBy: {
+                select: {
+                  id: true,
+                  name: true,
+                  image: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    orderBy: {
+      chatRoom: {
+        updatedAt: 'desc',
+      },
+    },
+  });
+
+  const formattedRooms = rooms.map((room) => {
+    const chat = room.chatRoom;
+
+    const participants = chat.members.map((m) => m.user);
+
+    const isGroup = chat.type === 'GROUP';
+
+    return {
+      roomId: chat.id,
+      type: chat.type,
+
+      title: isGroup ? chat.name : participants[0]?.name,
+
+      image: isGroup ? chat.image : participants[0]?.image,
+
+      participants,
+      unreadCount: room.unreadCount,
+      isMuted: room.isMuted,
+      updatedAt: chat.updatedAt,
+      lastMessage: chat.lastMessage,
+      lastMessageAt: chat.lastMessageAt,
+      reads: chat.messages[0]?.readBy || [],
+    };
+  });
+
+  return {
+    count: formattedRooms.length,
+    rooms: formattedRooms,
+  };
+};
+
 export const ChatsServices = {
   joinPrivateChatRoom,
   getUserRoomIds,
+  getChatRoomsByUserId,
 };

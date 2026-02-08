@@ -36,14 +36,16 @@ model User {
 }
 
 model ChatRoom {
-  id        String       @id @default(auto()) @map("_id") @db.ObjectId
-  type      ChatRoomType @default(PRIVATE)
-  name      String? // for group chats
-  image     String? // for group chats
-  adminId   String?      @db.ObjectId // for group chats
-  admin     User?        @relation("admin", fields: [adminId], references: [id])
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  type          ChatRoomType @default(PRIVATE)
+  name          String? // for group chats
+  image         String? // for group chats
+  adminId       String?      @db.ObjectId // for group chats
+  admin         User?        @relation("admin", fields: [adminId], references: [id])
+  lastMessage   String? // content of the last message for quick preview
+  lastMessageAt DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 
   members        ChatRoomMember[]
   messages       Message[]

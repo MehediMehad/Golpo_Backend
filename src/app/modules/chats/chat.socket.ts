@@ -1,4 +1,4 @@
-import type { RoleEnum } from '@prisma/client';
+import type { ChatRoomType, RoleEnum } from '@prisma/client';
 import httpStatus from 'http-status';
 import jwt from 'jsonwebtoken';
 import type { Server, Socket } from 'socket.io';
@@ -49,6 +49,12 @@ export function initializeSocket(io: Server) {
     socket.on('joinPrivateChatRoom', async (recipientId: string) => {
       const chatRoom = await ChatsServices.joinPrivateChatRoom(userId, recipientId);
       io.to(socket.id).emit('chatRoomJoined', chatRoom);
+    });
+
+    // Listen for getUserRooms event
+    socket.on('getUserRooms', async (type: 'group' | 'private') => {
+      const roomIds = await ChatsServices.getChatRoomsByUserId(userId, type as ChatRoomType);
+      io.to(socket.id).emit('userRooms', roomIds);
     });
 
     socket.on('disconnect', () => {

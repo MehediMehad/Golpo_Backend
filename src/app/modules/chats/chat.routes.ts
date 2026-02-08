@@ -14,4 +14,6 @@ router.post(
   ChatsControllers.joinPrivateChatRoom,
 );
 
+router.get('/rooms', auth('USER'), ChatsControllers.getChatRoomsByUserId);
+
 export const ChatsRoutes = router;
